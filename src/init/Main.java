@@ -26,7 +26,8 @@ public class Main {
 			"Usage:",
 			"-p <path>    specify the working directory. if not present, the application will defualt to the running directory",
 			"--help       show this help",
-			"-h           same as --help"
+			"-h           same as --help",
+			"-c           use the current directory. overridden if you use -p"
 	};
 	
 	private static final String[] ALLOWED_EXTENSIONS = new String[]{"json", "png", "obj", "mcmeta"}; //all currently allowed extensions, lang files won't be renamed! not allowed
@@ -45,6 +46,7 @@ public class Main {
 		options = new Options();
 		options.addOption("h", false, "show help");
 		options.addOption("p", true, "path");
+		options.addOption("c", true, "use the current directory");
 	}
 	
 	public static void main(String[] args) {
@@ -70,9 +72,13 @@ public class Main {
 				}
 			}
 			else {
-				rootPath = new File(System.getProperty("user.dir"));
+				if(cmd.hasOption("c")) rootPath = new File(System.getProperty("user.dir"));
 			}
-			System.out.println("working directory: " + rootPath.getAbsolutePath());
+			if(rootPath != null) System.out.println("working directory: " + rootPath.getAbsolutePath());
+			else {
+				System.out.println("no path specified!");
+				displayUsage();
+			}
 			
 			
 		} catch (ParseException e) {
