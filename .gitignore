@@ -17,3 +17,7 @@ hs_err_pid*
 \.classpath
 
 build/
+
+libs/commons-cli-1\.4/apidocs/
+
+libs/commons-io-2\.5/docs/
