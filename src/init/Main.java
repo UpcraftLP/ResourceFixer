@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -21,14 +24,6 @@ import util.DataUtils;
 public class Main {
 	
 	private static final String COPYRIGHT = "ResourceFixer \u00A92017 UpcraftLP - all righs reserved.";
-	
-	private static final String[] USAGE = new String[]{
-			"Usage:",
-			"-p <path>    specify the working directory",
-			"--help       show this help",
-			"-h           same as --help",
-			"-c           use the current directory. overridden if you use -p"
-	};
 	
 	private static final String[] ALLOWED_EXTENSIONS = new String[]{"json", "png", "obj", "mcmeta"}; //all currently allowed extensions, lang files won't be renamed! not allowed
 	private static final String[] CODE_FILES = new String[]{"json", "obj"};
@@ -44,45 +39,46 @@ public class Main {
 	
 	static {
 		options = new Options();
-		options.addOption("h", false, "show help");
-		options.addOption("p", true, "path");
-		options.addOption("c", true, "use the current directory");
+		
+		final OptionGroup pathOptions = new OptionGroup();
+		pathOptions.setRequired(true);
+		pathOptions.addOption(Option.builder("p").longOpt("path").desc("specify the working directory").hasArg().required().build());
+		pathOptions.addOption(Option.builder("c").longOpt("current").desc("use the current directory. overridden if you use -p").required().build());
+		pathOptions.addOption(Option.builder("h").longOpt("help").desc("show this help").build());
+		options.addOptionGroup(pathOptions);
 	}
 	
 	public static void main(String[] args) {
 		System.out.println(COPYRIGHT);
-		if(args.length == 0) {
-			displayUsage();
-		}
 		
 		CommandLineParser parser = new DefaultParser();
 		try {
+			if(args.length == 0) throw new ParseException(null);
+			
 			CommandLine cmd = parser.parse(options, args);
-			if(cmd.hasOption("h") || cmd.hasOption("-help") || cmd.hasOption("?")) {
-				displayUsage();
-			}
+			if(cmd.hasOption("h") || cmd.hasOption("-help") || cmd.hasOption("?")) throw new ParseException(null);
 			
 			//determine the working directory
-			String path = cmd.getOptionValue("p");
-			if(path != null) {
+			String path = null;
+			if(cmd.hasOption("c")) path = System.getProperty("user.dir");
+			if(cmd.hasOption("p")) path = cmd.getOptionValue("p");
+			
+			if(path != null && !path.isEmpty()) {
 				rootPath = new File(path);
 				if(!rootPath.exists() || !rootPath.isDirectory()) {
-					System.out.println("\"" + rootPath.getAbsolutePath() + "\" does not exist or is not a directory!");
-					end(1);
+					throw new ParseException("\"" + rootPath.getAbsolutePath() + "\" does not exist or is not a directory!");
+					
 				}
+				System.out.println("working directory: \"" + rootPath.getAbsolutePath() + "\"");
 			}
-			else {
-				if(cmd.hasOption("c")) rootPath = new File(System.getProperty("user.dir"));
-			}
-			if(rootPath != null) System.out.println("working directory: " + rootPath.getAbsolutePath());
-			else {
-				System.out.println("no path specified!");
-				displayUsage();
-			}
-			
-			
+			else throw new ParseException("no path specified!");
 		} catch (ParseException e) {
-			displayUsage();
+			String msg = e.getMessage();
+			if(msg != null) {
+				System.out.println(msg);
+				displayUsage(1);
+			}
+			else displayUsage(0);
 		}
 		
 		collectAndProcess(); //do all the magic
@@ -90,9 +86,10 @@ public class Main {
 		end(0);
 	}
 	
-	private static void displayUsage() {
-		for(String s : USAGE) System.out.println(s);
-		end(0);
+	private static void displayUsage(int exitCode) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("java -jar resourcefixer.jar -h", options);
+		end(exitCode);
 	}
 
 	public static void end(int exitCode) {
