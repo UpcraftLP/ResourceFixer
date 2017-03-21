@@ -24,7 +24,7 @@ public class Main {
 	
 	private static final String[] USAGE = new String[]{
 			"Usage:",
-			"-p <path>    specify the working directory. if not present, the application will defualt to the running directory",
+			"-p <path>    specify the working directory",
 			"--help       show this help",
 			"-h           same as --help",
 			"-c           use the current directory. overridden if you use -p"
