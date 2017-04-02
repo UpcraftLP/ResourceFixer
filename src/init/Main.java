@@ -1,6 +1,7 @@
 package init;
 
 import java.io.File;
+import java.time.Year;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,9 +24,9 @@ import util.DataUtils;
 
 public class Main {
 	
-	private static final String COPYRIGHT = "ResourceFixer \u00A92017 UpcraftLP - all righs reserved.";
+	private static final String COPYRIGHT = "ResourceFixer Copyright (C)2017-" + Year.now().getValue() + " UpcraftLP - all righs reserved.";
 	
-	private static final String[] ALLOWED_EXTENSIONS = new String[]{"json", "png", "obj", "mcmeta"}; //all currently allowed extensions, lang files won't be renamed! not allowed
+	private static final String[] ALLOWED_EXTENSIONS = new String[]{"json", "png", "obj", "mcmeta", "ogg"}; //all currently allowed extensions, lang files won't be renamed! not allowed
 	private static final String[] CODE_FILES = new String[]{"json", "obj"};
 	private static final String[] LANGUAGE_FILES = new String[]{"lang"};
 	
@@ -56,7 +57,7 @@ public class Main {
 			if(args.length == 0) throw new ParseException(null);
 			
 			CommandLine cmd = parser.parse(options, args);
-			if(cmd.hasOption("h") || cmd.hasOption("-help") || cmd.hasOption("?")) throw new ParseException(null);
+			if(cmd.hasOption("h") || cmd.hasOption("?")) throw new ParseException(null);
 			
 			//determine the working directory
 			String path = null;
